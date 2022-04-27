@@ -71,7 +71,7 @@ router.post('/loginpage',async(req,res)=>{
     if(userName){
         userDetails=await schema.findOne({userName:userName}).exec()
         if(!userDetails){
-            return res.status(400).json({status: "failure", message: "Don't have an account?please Register"});
+            return res.status(400).json({status: "failure", message: "Don't have an account... please Register"});
         }else if(userDetails){
             console.log(userDetails.password)
             let match=await bcrypt.compare(password,userDetails.password);
@@ -120,11 +120,21 @@ router.post('/sendMail',async(req,res ) =>{
          const toMail = req.body.toMail
          const subject = req.body.subject
          const text = req.body.text
-         var mailData={
-            from:'ajay.platosys@gmail.com',
-            to :toMail,
-            subject:subject,
-            text:text
+
+         var mailData = {
+            from    :'ajay.platosys@gmail.com',
+            to      : toMail,
+            subject : subject,
+            text    : text,
+            fileName:'confirmationemail.ejs',
+            attachments:{
+                filename:'testmail.pdf',
+                filePath:'../templates/testmail.pdf'
+                },
+            attachments:{
+                filename:'testimage.jpeg',
+                filePath:'../templates/testimage.jpeg'
+                }
         }
         let data = await mail.mailSending(mailData);
          return res.status(200).json({status: "success", message: "email sent successfully"})

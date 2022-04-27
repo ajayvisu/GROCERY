@@ -3,10 +3,16 @@ const express           = require ('express');
 const mongoose          = require ('mongoose');
 const cors              = require ('cors');
 const morgan            = require ('morgan');
-const ejs               = require('ejs');
+//const ejs               = require('ejs');
 const expresslayouts    = require('express-ejs-layouts');
+// const sgMail            = require('@sendgrid/mail');
+// const API_KEY           = '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';
 
-const app        = express();
+// sgMail.setApiKey(API_KEY)
+
+
+
+const app = express();
 
 require ('dotenv').config();
 const port = process.env.port || 5000;
@@ -20,6 +26,20 @@ app.use (express.json());
 app.use (cors());
 app.use (expresslayouts);
 
+// //mail using sendgrid
+// const message = {
+//     to: ['ajay.platosys@gmail.com', 'divya.platosys@gmail.com'],
+//     from: 'ajay.platosys@gmail.com',
+//     subject: 'test mail from sendgrid',
+//     text: 'test mail from sendgrid',
+//     html: '<h>test mail from sendgrid</h>',
+// }
+
+// sgMail
+// .send(message)
+// .then((response) => console.log ('email send using sendgrid'))
+// .catch((error) => console.log (error.message));
+
 //static files
 app.use(express.static('public'))
 //app.use('/css', express.static(_dirname + 'public/css'))
@@ -29,13 +49,17 @@ app.use(express.static('public'))
 //setting template engine
 app.set('view engine', 'ejs')
 
-//navigation
+//navigation for email using nodemailer
 app.get('/index', (req,res) =>{
     res.render('index.ejs', {name: 'Ajay'})
 })
 
 app.get('/login', (req,res) =>{
     res.render('login.ejs')
+})
+
+app.get('/conformation.mail', (req,res) =>{
+    res.render('conformation.mail.ejs')
 })
 
 //localhost connection
