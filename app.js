@@ -6,11 +6,9 @@ const morgan            = require ('morgan');
 //const ejs               = require('ejs');
 const expresslayouts    = require('express-ejs-layouts');
 // const sgMail            = require('@sendgrid/mail');
-// const API_KEY           = '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';
+// const API_KEY           = '',
 
 // sgMail.setApiKey(API_KEY)
-
-
 
 const app = express();
 
