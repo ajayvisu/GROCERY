@@ -66,7 +66,7 @@ app.listen (port,() =>{
 });
 
 //db connection
-mongoose.connect(process.env.dbUrl, {
+mongoose.connect(process.env.DBURL, {
     useNewUrlParser : true,
     useUnifiedTopology : true
 }).then(data =>{

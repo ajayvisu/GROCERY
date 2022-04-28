@@ -3,10 +3,16 @@ const bcrypt        = require('bcrypt');
 const jwt           = require('jsonwebtoken');
 const moment        = require('moment');
 const { Admin }     = require('mongodb');
+const {totp}        = require('otplib');
+const fast2sms      = require('fast-two-sms');
+
 const schema        = require('../models/user.model');
 const {joiSchema}   = require("../validation/joiSchema");
-const mail          = require('../middleware/email');
+const mailSending   = require("../middleware/email");
+const verifyotp     = require("../middleware/sms");
 
+
+require ('dotenv').config();
 
 router.post('/register',async(req,res) =>{
 try{
@@ -66,12 +72,14 @@ router.post('/loginpage',async(req,res)=>{
     try{
         let userName = req.body.userName;
         let password = req.body.password;
-     let userDetails;
-     let details=await schema.findOne({username:userName}).select('-username -_id ').exec()
+        //let Message  = req.body.message;
+        let userDetails;
+        let details = await schema.findOne({username:userName}).select('-username -_id ').exec()
     if(userName){
         userDetails=await schema.findOne({userName:userName}).exec()
         if(!userDetails){
             return res.status(400).json({status: "failure", message: "Don't have an account... please Register"});
+        
         }else if(userDetails){
             console.log(userDetails.password)
             let match=await bcrypt.compare(password,userDetails.password);
@@ -81,11 +89,29 @@ router.post('/loginpage',async(req,res)=>{
                 await schema.findOneAndUpdate({uuid:userDetails.uuid},{firstLoginStatus:true},{new:true}).exec()
             }
             let payload = {uuid: userDetails.uuid,role:userDetails.role}
-           // let payload = {uuid: userDetails.uuid,role:Admin}
+            //let payload = {uuid: userDetails.uuid,role:Admin}
+
             if(match){
-               let userDetails=details.toObject()//to append jwt token
-               let jwttoken = jwt.sign(payload, process.env.secretKey)
-               userDetails.jwttoken = jwttoken
+                let userDetails=details.toObject()//to append jwt token
+                let jwttoken = jwt.sign(payload, process.env.secretKey)
+                userDetails.jwttoken = jwttoken
+                
+                token =  verifyotp.verifyotp('send')
+                await userSchema.findOneAndUpdate({uuid: userdetails.uuid}, {otp: token}, {new:true}).exec() 
+                var option = {
+                    authorization:"F2S_APIKEY",
+                    message: "your otp code for login is:"+token,
+                    numbers: [userDetails.mobileNumber]
+                };
+                fast2sms.sendMessage(option)
+                .then((response)=>{
+                    console.log(response)
+                })
+                .catch((error)=>{
+                    console.log(error)
+                })
+
+
                await schema.findOneAndUpdate({uuid: userDetails.uuid}, {loginStatus: true}, {new:true}).exec()
                 return res.status(200).json({status: "success", message: "Login successfully",data:{userDetails,jwttoken}})
             }else{
